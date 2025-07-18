@@ -1,0 +1,53 @@
+{
+  "name": "@agonzalezwww/react-native-social-login",
+  "version": "1.0.0",
+  "description": "A React Native package for social authentication with customizable buttons for multiple providers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "assets/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npx tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "react-native",
+    "social-login",
+    "google-signin",
+    "apple-signin",
+    "authentication",
+    "expo",
+    "typescript"
+  ],
+  "author": "Andreu González <agonzalez@wwwarcelona.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agonzalezwww/react-native-social-login.git"
+  },
+  "bugs": {
+    "url": "https://github.com/agonzalezwww/react-native-social-login/issues"
+  },
+  "homepage": "https://github.com/agonzalezwww/react-native-social-login#readme",
+  "peerDependencies": {
+    "@react-native-google-signin/google-signin": "^10.1.2",
+    "expo-apple-authentication": "^6.4.2",
+    "react": ">=18.0.0",
+    "react-native": ">=0.70.0 <0.76.0"
+  },
+  "devDependencies": {
+    "@react-native-google-signin/google-signin": "^10.1.2",
+    "@types/react": "^18.2.0",
+    "@types/react-native": "^0.72.8",
+    "expo-apple-authentication": "^6.4.2",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
