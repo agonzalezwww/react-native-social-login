@@ -6,6 +6,7 @@ type AuthButtonProps = {
   provider: 'google' | 'apple';
   onPress: () => Promise<void> | void;
   disabled?: boolean;
+  loading?: boolean;
   buttonHeight?: number;
   
   googleProps?: Partial<GoogleAuthButtonProps>;
@@ -16,6 +17,7 @@ export function AuthButton({
   provider, 
   onPress, 
   disabled, 
+  loading,
   buttonHeight,
   googleProps,
   appleProps 
@@ -25,6 +27,7 @@ export function AuthButton({
       <GoogleAuthButton 
         onPress={onPress}
         disabled={disabled}
+        loading={loading}
         buttonHeight={buttonHeight}
         {...googleProps}
       />
@@ -36,6 +39,7 @@ export function AuthButton({
       <AppleAuthButton 
         onPress={onPress}
         disabled={disabled}
+        loading={loading}
         buttonHeight={buttonHeight}
         {...appleProps}
       />

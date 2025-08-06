@@ -6,6 +6,7 @@ import {
   Pressable,
   ViewStyle,
   DimensionValue,
+  ActivityIndicator,
 } from "react-native";
 
 const googleIcon = require("../../assets/icons/google.png");
@@ -14,8 +15,10 @@ export type GoogleAuthButtonProps = {
   onPress: () => Promise<void> | void;
   mode?: "login" | "signup";
   disabled?: boolean;
+  loading?: boolean;
   loginText?: string;
   signupText?: string;
+  loadingText?: string;
   buttonStyle?: ViewStyle;
   buttonHeight?: number;
   buttonWidth?: DimensionValue;
@@ -27,8 +30,10 @@ export function GoogleAuthButton({
   onPress,
   mode = "login",
   disabled = false,
+  loading = false,
   loginText = "Sign in with Google",
   signupText = "Sign up with Google",
+  loadingText,
   buttonStyle,
   buttonHeight = 48,
   buttonWidth = "100%",
@@ -36,11 +41,19 @@ export function GoogleAuthButton({
   iconSize = 18,
 }: GoogleAuthButtonProps) {
   const handlePress = () => {
-    if (disabled) return;
-    onPress?.();
+    if (disabled || loading) return;
+    try {
+      onPress?.();
+    } catch (error) {
+      console.warn('Google Sign-In not properly configured. Please check your setup.');
+      console.warn(error);
+    }
   };
 
-  const buttonText = mode === "login" ? loginText : signupText;
+  const isButtonDisabled = disabled || loading;
+  const buttonText = loading && loadingText 
+    ? loadingText 
+    : mode === "login" ? loginText : signupText;
 
   const containerStyle: ViewStyle = {
     ...styles.button,
@@ -55,6 +68,14 @@ export function GoogleAuthButton({
   ];
 
   const renderIcon = () => {
+    if (loading) {
+      return React.createElement(ActivityIndicator as any, {
+        size: "small",
+        color: "#3c4043",
+        style: styles.loadingIndicator,
+      });
+    }
+    
     if (hideIcon) return null;
     
     return React.createElement(Image as any, {
@@ -74,10 +95,10 @@ export function GoogleAuthButton({
   return React.createElement(Pressable as any, {
     style: ({ pressed }: any) => ({
       ...containerStyle,
-      opacity: (disabled || pressed) ? 0.7 : 1,
+      opacity: (isButtonDisabled || pressed) ? 0.7 : 1,
     }),
     onPress: handlePress,
-    disabled: disabled,
+    disabled: isButtonDisabled,
   }, renderIcon(), renderText());
 }
 
@@ -102,5 +123,8 @@ const styles = StyleSheet.create({
   googleIcon: {
     width: 18,
     height: 18,
+  },
+  loadingIndicator: {
+    marginRight: 0,
   },
 }); 

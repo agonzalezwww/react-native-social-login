@@ -1,5 +1,5 @@
 import React from "react";
-import { ViewStyle } from "react-native";
+import { ViewStyle, View, ActivityIndicator, StyleSheet } from "react-native";
 import * as AppleAuthentication from "expo-apple-authentication";
 
 export type AppleAuthButtonProps = {
@@ -11,6 +11,7 @@ export type AppleAuthButtonProps = {
   cornerRadius?: number;
   containerStyle?: ViewStyle;
   disabled?: boolean;
+  loading?: boolean;
 };
 
 export function AppleAuthButton({
@@ -22,6 +23,7 @@ export function AppleAuthButton({
   cornerRadius = 4,
   containerStyle,
   disabled = false,
+  loading = false,
 }: AppleAuthButtonProps) {
   const [isAvailable, setIsAvailable] = React.useState(false);
 
@@ -34,9 +36,11 @@ export function AppleAuthButton({
   }
 
   const handlePress = () => {
-    if (disabled) return;
+    if (disabled || loading) return;
     onPress?.();
   };
+
+  const isButtonDisabled = disabled || loading;
 
   const nativeButtonType = {
     signin: AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN,
@@ -54,18 +58,61 @@ export function AppleAuthButton({
     height: buttonHeight,
     minWidth: 140,
     ...(buttonWidth && { width: buttonWidth }),
-    ...(disabled && { opacity: 0.6 }),
-    ...(disabled && { pointerEvents: 'none' }),
+    ...(isButtonDisabled && { opacity: 0.6 }),
+    ...(isButtonDisabled && { pointerEvents: 'none' }),
     ...containerStyle,
   };
 
+  const getActivityIndicatorColor = () => {
+    switch (buttonStyle) {
+      case "white":
+      case "white-outline":
+        return "#000000";
+      case "black":
+      default:
+        return "#ffffff";
+    }
+  };
+
   return (
-    <AppleAuthentication.AppleAuthenticationButton
-      buttonType={nativeButtonType}
-      buttonStyle={nativeButtonStyle}
-      cornerRadius={cornerRadius}
-      style={buttonStyles}
-      onPress={handlePress}
-    />
+    <View style={styles.container}>
+      {loading ? (
+        <View style={[buttonStyles, styles.loadingContainer]}>
+          <ActivityIndicator 
+            size="small" 
+            color={getActivityIndicatorColor()} 
+          />
+        </View>
+      ) : (
+        <AppleAuthentication.AppleAuthenticationButton
+          buttonType={nativeButtonType}
+          buttonStyle={nativeButtonStyle}
+          cornerRadius={cornerRadius}
+          style={buttonStyles}
+          onPress={handlePress}
+        />
+      )}
+    </View>
   );
-} 
+}
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  },
+}); 
