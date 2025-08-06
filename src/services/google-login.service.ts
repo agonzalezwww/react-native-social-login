@@ -1,7 +1,8 @@
 import {
   GoogleSignin,
-  type User,
+  User,
 } from "@react-native-google-signin/google-signin";
+import { SocialAuthUser, GoogleAuthResponse } from "../types";
 
 class GoogleLogin {
   private static isConfigured = false;
@@ -24,14 +25,19 @@ class GoogleLogin {
 
   static config = GoogleLogin.configure;
 
-  static async signIn(): Promise<User> {
+  static async signIn(): Promise<SocialAuthUser> {
     if (!this.isConfigured) {
       throw new Error("GoogleLogin not configured. Call configure() first.");
     }
     try {
       await GoogleSignin.hasPlayServices();
-      const user = await GoogleSignin.signIn();
-      return user;
+      const googleResponse: {data: User, type: string} = await GoogleSignin.signIn() as unknown as {data: User, type: string};
+      const googleDataResponse: GoogleAuthResponse = {
+        data: googleResponse.data,
+        type: googleResponse.type,
+      }
+      // Map Google response to unified format
+      return this.mapGoogleResponseToUnifiedUser(googleDataResponse.data);
     } catch (error) {
       throw error;
     }
@@ -51,24 +57,42 @@ class GoogleLogin {
     return await GoogleSignin.isSignedIn();
   }
 
-  static async getCurrentUser(): Promise<User | null> {
+  static async getCurrentUser(): Promise<SocialAuthUser | null> {
     if (!this.isConfigured) {
       throw new Error("GoogleLogin not configured. Call configure() first.");
     }
-    return await GoogleSignin.getCurrentUser();
+    const googleUser = await GoogleSignin.getCurrentUser();
+    if (!googleUser) return null;
+    
+    return this.mapGoogleResponseToUnifiedUser(googleUser);
   }
 
   static async Login(config: {
     iosClientId: string;
     webClientId: string;
     offlineAccess?: boolean;
-  }): Promise<User> {
+  }): Promise<SocialAuthUser> {
     try {
       this.configure(config);
       return await this.signIn();
     } catch (error) {
       throw error;
     }
+  }
+
+  // Helper method to map Google response to unified format
+  private static mapGoogleResponseToUnifiedUser(googleResponse: User): SocialAuthUser {
+    return {
+      id: googleResponse.user.id,
+      email: googleResponse.user.email,
+      name: googleResponse.user.name,
+      givenName: googleResponse.user.givenName,
+      familyName: googleResponse.user.familyName,
+      photo: googleResponse.user.photo,
+      idToken: googleResponse.idToken,
+      serverAuthCode: googleResponse.serverAuthCode,
+      scopes: googleResponse.scopes,
+    };
   }
 }
 
